@@ -1,4 +1,3 @@
-// Chat.jsx
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMugHot, faPaperPlane, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -18,52 +17,52 @@ function Chat() {
 
   useEffect(() => {
     if (name) {
-      socket.emit('setUsername', name);
+        socket.emit('setUsername', name);
     }
 
     socket.on('message', (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setConversations((prevConversations) => ({
-        ...prevConversations,
-        All: [...prevConversations.All, newMessage],
-      }));
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setConversations((prevConversations) => ({
+            ...prevConversations,
+            All: [...prevConversations.All, newMessage],
+        }));
     });
 
     socket.on('privateMessage', (newMessage) => {
-      const recipientKey =
-        newMessage.senderId === socket.id
-          ? newMessage.recipientId
-          : newMessage.senderId;
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setConversations((prevConversations) => ({
-        ...prevConversations,
-        [recipientKey]: [
-          ...(prevConversations[recipientKey] || []),
-          newMessage,
-        ],
-      }));
+        const recipientKey =
+            newMessage.senderId === socket.id
+                ? newMessage.recipientId
+                : newMessage.senderId;
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setConversations((prevConversations) => ({
+            ...prevConversations,
+            [recipientKey]: [
+                ...(prevConversations[recipientKey] || []),
+                newMessage,
+            ],
+        }));
     });
 
-    socket.on('typing', ({ recipientId: typingRecipientId, feedback }) => {
-      setFeedback(feedback);
+    socket.on('userConnected', (message) => {
+        setMessages((prevMessages) => [...prevMessages, { text: message, author: "System" }]);
     });
 
-    socket.on('clientsTotal', (totalClients) => {
-      setClientsTotal(totalClients);
+    socket.on('userDisconnected', (message) => {
+        setMessages((prevMessages) => [...prevMessages, { text: message, author: "System" }]);
     });
 
-    socket.on('updateUserList', (userList) => {
-      setUsers(userList);
+    socket.on('errorMessage', (errorMessage) => {
+        alert(errorMessage);
     });
 
     return () => {
-      socket.off('message');
-      socket.off('privateMessage');
-      socket.off('typing');
-      socket.off('clientsTotal');
-      socket.off('updateUserList');
+        socket.off('message');
+        socket.off('privateMessage');
+        socket.off('userConnected');
+        socket.off('userDisconnected');
+        socket.off('errorMessage');
     };
-  }, [name, recipientId]);
+  }, [name]);
 
   const handleNameChange = (e) => {
     setName(e.target.value);
