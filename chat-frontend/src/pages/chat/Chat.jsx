@@ -3,10 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMugHot, faPaperPlane, faUser } from '@fortawesome/free-solid-svg-icons';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:4001');
+const token = localStorage.getItem("token"); 
+const socket = io('http://localhost:4001', {
+    auth: { token }
+});
 
 function Chat() {
-  const [name, setName] = useState(localStorage.getItem('username') || ''); // Prefill with stored username
+  const [name, setName] = useState(localStorage.getItem('username') || ''); 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [feedback, setFeedback] = useState('');
